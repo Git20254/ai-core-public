@@ -1,0 +1,4 @@
+"artistName","artistEmail","type","trackTitle","month","playCount","amount","rate","createdAt"
+"My First Artist","artist@example.com","Payout","ALL","2025-09",1,0.01,0.01,"2025-09-28T21:51:05.823Z"
+"My First Artist","artist@example.com","Track Total","My First Track","ALL",1,0.01,0.01,"2025-09-29T00:45:19.049Z"
+"My First Artist","artist@example.com","Track Monthly","My First Track","2025-09",1,0.01,0.01,"2025-09-29T00:45:19.049Z"

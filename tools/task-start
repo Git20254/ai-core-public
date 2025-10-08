@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+if [ $# -lt 2 ]; then
+  echo "usage: tools/task-start <scope> \"Title...\"" >&2
+  exit 1
+fi
+SCOPE="$1"; shift
+TITLE="$*"
+ID="$(date +"%Y%m%d-%H%M%S")-$SCOPE"
+LOG="logs/tasks/$ID.md"
+mkdir -p "$(dirname "$LOG")"
+{
+  echo "# $TITLE"
+  echo
+  echo "- **Task ID**: $ID"
+  echo "- **Start**:  $(date -u +"%Y-%m-%d %H:%M:%SZ")"
+  echo
+  echo "## Notes"
+} > "$LOG"
+echo "$ID" > .task_current
+echo "Started $ID -> $LOG"

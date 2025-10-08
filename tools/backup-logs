@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -euo pipefail
+CONF=".backup_dest"
+DEST="${1:-}"
+pick_external_volume() {
+  for vol in /Volumes/*; do
+    [ -d "$vol" ] || continue
+    case "$(basename "$vol")" in
+      "Preboot"|"Recovery"|"VM"|"macOS"|"Update"|"com.apple.TimeMachine"*) continue ;;
+    esac
+    [ -w "$vol" ] && { echo "$vol"; return 0; }
+  done
+  return 1
+}
+if [ -z "${DEST}" ]; then
+  if [ -f "$CONF" ]; then DEST="$(cat "$CONF")"
+  else
+    if vol="$(pick_external_volume)"; then DEST="$vol/indie-stream-logs"
+    else
+      echo "No writable external volume found in /Volumes. Provide a path, e.g.:" >&2
+      echo "  tools/backup-logs \"/Volumes/YourDrive/indie-stream-logs\"" >&2
+      exit 2
+    fi
+  fi
+fi
+mkdir -p "$DEST"
+[ -d logs ] || mkdir -p logs/{sessions,tasks}
+rsync -a --delete logs/ "$DEST"/
+echo "✅ Logs mirrored to: $DEST"
+echo "$DEST" > .backup_dest

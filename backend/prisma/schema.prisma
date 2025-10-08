@@ -1,0 +1,159 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  FAN
+  ARTIST
+  ADMIN
+}
+
+model User {
+  id                 Int      @id @default(autoincrement())
+  email              String   @unique
+  password           String
+  role               Role     @default(FAN)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  subscriptionActive Boolean  @default(false)
+
+  // Relations
+  profile           Profile?
+  streams           Stream[]
+  payouts           Payout[]
+  tracks            Track[]
+  trackLikes        TrackLike[]
+  playlists         Playlist[]
+  followedPlaylists PlaylistFollow[]
+  collaborations    PlaylistCollaborator[] // 👈 user's collaborations
+  PlaylistTrack     PlaylistTrack[]
+}
+
+model Profile {
+  id          Int     @id @default(autoincrement())
+  userId      Int     @unique
+  user        User    @relation(fields: [userId], references: [id])
+  bio         String?
+  avatarUrl   String?
+  avatarSizes Json?
+}
+
+model StripeEvent {
+  id        Int      @id @default(autoincrement())
+  type      String
+  data      Json
+  createdAt DateTime @default(now())
+}
+
+model Track {
+  id        Int      @id @default(autoincrement())
+  title     String
+  artist    String
+  artwork   String?
+  createdAt DateTime @default(now())
+  playCount Int      @default(0)
+
+  // Relations
+  userId    Int
+  user      User            @relation(fields: [userId], references: [id])
+  streams   Stream[]
+  likes     TrackLike[]
+  playlists PlaylistTrack[]
+}
+
+model Stream {
+  id        Int      @id @default(autoincrement())
+  trackId   Int
+  track     Track    @relation(fields: [trackId], references: [id])
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model TrackLike {
+  id        Int      @id @default(autoincrement())
+  trackId   Int
+  track     Track    @relation(fields: [trackId], references: [id])
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([trackId, userId])
+}
+
+model Payout {
+  id        Int      @id @default(autoincrement())
+  artistId  Int
+  artist    User     @relation(fields: [artistId], references: [id])
+  amount    Float
+  createdAt DateTime @default(now())
+}
+
+//
+// 🎧 Playlists (Spotify / Apple Music / Tidal-style)
+//
+model Playlist {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  isPublic    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  userId        Int
+  user          User                   @relation(fields: [userId], references: [id])
+  tracks        PlaylistTrack[]        @relation("PlaylistTracks")
+  followers     PlaylistFollow[]       @relation("PlaylistFollowers")
+  collaborators PlaylistCollaborator[] // 👈 collaboration links
+}
+
+model PlaylistTrack {
+  id         Int      @id @default(autoincrement())
+  playlistId Int
+  trackId    Int
+  addedAt    DateTime @default(now())
+
+  // 👇 Attribution: who added the track
+  addedById Int?
+  addedBy   User? @relation(fields: [addedById], references: [id])
+
+  playlist Playlist @relation("PlaylistTracks", fields: [playlistId], references: [id], onDelete: Cascade)
+  track    Track    @relation(fields: [trackId], references: [id])
+
+  @@unique([playlistId, trackId])
+}
+
+model PlaylistFollow {
+  id         Int      @id @default(autoincrement())
+  playlistId Int
+  userId     Int
+  followedAt DateTime @default(now())
+
+  playlist Playlist @relation("PlaylistFollowers", fields: [playlistId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id])
+
+  @@unique([playlistId, userId])
+}
+
+//
+// 🎯 Playlist Collaborators (Apple Music / Tidal-style collab playlists)
+//
+model PlaylistCollaborator {
+  id         Int      @id @default(autoincrement())
+  playlistId Int
+  userId     Int
+  canEdit    Boolean  @default(true)
+  canInvite  Boolean  @default(false)
+  invitedAt  DateTime @default(now())
+
+  playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id])
+
+  @@unique([playlistId, userId])
+}

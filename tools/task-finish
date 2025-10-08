@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+if [ ! -f .task_current ]; then
+  echo "No active task. Run tools/task-start first." >&2
+  exit 1
+fi
+ID="$(cat .task_current)"
+LOG="logs/tasks/$ID.md"
+{
+  echo
+  echo "## Finish"
+  echo "- **End**: $(date -u +"%Y-%m-%d %H:%M:%SZ")"
+} >> "$LOG"
+rm .task_current
+echo "Finished $ID"

@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Always run from repo root if we're in a Git repo
+if git rev-parse --show-toplevel >/dev/null 2>&1; then
+  cd "$(git rev-parse --show-toplevel)"
+fi
+
+TS="$(date +"%Y%m%d-%H%M%S")"
+SCOPE="ad-hoc"
+TITLE="auto snapshot"
+
+# If a task is active, use its ID and title
+if [ -f .task_current ]; then
+  ID="$(cat .task_current)"                    # e.g. 20250920-175605-mobile/theme
+  TS="${ID%%-*}"                               # left part up to first dash
+  SCOPE="${ID#*-}"                              # everything after first dash
+  TITLE="$(sed -n '1s/^# //p;1q' "logs/tasks/$ID.md" 2>/dev/null || echo "task in progress")"
+fi
+
+# Record a line in today’s session log
+mkdir -p logs/sessions
+echo "[$(date -u +'%F %T UTC')] snapshot ${TS}-${SCOPE}" >> "logs/sessions/$(date +%F).session.txt"
+
+# Stage everything (including new files)
+git add -A
+
+# If nothing changed, exit quietly
+if git diff --cached --quiet; then
+  echo "ⓘ No changes to snapshot."
+  exit 0
+fi
+
+MSG="task(${TS}-${SCOPE}): ${TITLE}"
+git commit -m "$MSG"
+
+TAG="snap-${TS}-${SCOPE}"
+git tag -f "$TAG" >/dev/null 2>&1 || true
+
+echo "✅ Snapshot committed:"
+echo "    $MSG"
+echo "    tag: $TAG"

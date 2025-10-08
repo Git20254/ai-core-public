@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  LISTENER
+  ARTIST
+  ADMIN
+}
+
+enum ProfileKind {
+  LISTENER
+  ARTIST
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  role      Role     @default(LISTENER)
+  createdAt DateTime @default(now())
+  profile   Profile?
+}
+
+model Profile {
+  id          String       @id @default(cuid())
+  userId      String       @unique
+  user        User         @relation(fields: [userId], references: [id])
+  kind        ProfileKind
+  displayName String
+  genres      String[]     @default([])
+  avatarUrl   String?
+  bio         String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Profile {
+  userId     String  @id
+  kind       String  @default("LISTENER")
+  displayName String
+  genres     String[] @default([])
+  avatarUrl  String?
+  bio        String?
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

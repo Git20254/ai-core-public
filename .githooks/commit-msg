@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+MSG_FILE="$1"
+MSG="$(cat "$MSG_FILE")"
+if ! grep -Eq 'task\([0-9]{8}-[0-9]{6}-[a-z0-9/_-]+\):' <<<"$MSG"; then
+  echo "TIP: Prefix commit message with: task(YYYYMMDD-HHMMSS-scope): ..." >&2
+fi
+exit 0

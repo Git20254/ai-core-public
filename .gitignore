@@ -1,0 +1,51 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+*.env
+*.log
+*.sqlite3
+.DS_Store
+
+# --- AI / Data Assets ---
+data/
+logs/
+artifacts/
+models/
+checkpoints/
+*.faiss
+*.npy
+*.npz
+*.json
+*.mp3
+*.wav
+*.pt
+*.pkl
+*.bin
+
+# --- FastAPI / Cache ---
+*.db
+*.pid
+*.sock
+*.lock
+*.tmp
+cache/
+sessions/
+
+# --- IDE / OS files ---
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+
+# --- Backups / Notes ---
+backup/
+notes/
+drafts/
+
+# --- Security ---
+secrets/
+apikeys/
+private/

@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+[ $# -eq 1 ] || { echo "usage: tools/set-backup-dest \"/Volumes/YourDrive/indie-stream-logs\"" >&2; exit 1; }
+DEST="$1"
+mkdir -p "$DEST"
+echo "$DEST" > .backup_dest
+echo "🔒 Backup destination saved to .backup_dest:"
+echo "    $DEST"

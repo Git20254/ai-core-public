@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+
+# Only prompt if repo is cleanly accessible
+CHANGES=$(git status --porcelain || echo "")
+if [ -z "$CHANGES" ]; then
+  # No changes—quietly exit to avoid noise
+  exit 0
+fi
+
+BTN=$(osascript <<'APPLESCRIPT'
+tell application "System Events"
+  activate
+end tell
+display dialog "Take a snapshot of current changes?" with title "Indie Stream Logger" buttons {"Skip", "Log now"} default button "Log now" giving up after 20
+set btn to button returned of result
+return btn
+APPLESCRIPT
+) || true
+
+if [ "$BTN" = "Log now" ]; then
+  tools/snapshot || true
+fi

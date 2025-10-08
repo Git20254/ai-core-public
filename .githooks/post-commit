@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+if [ -x tools/backup-logs ]; then tools/backup-logs >/dev/null 2>&1 || true; fi

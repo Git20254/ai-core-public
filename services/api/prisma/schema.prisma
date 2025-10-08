@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  LISTENER
+  ARTIST
+  ADMIN
+}
+
+enum ProfileKind {
+  LISTENER
+  ARTIST
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  role      Role     @default(LISTENER)
+  createdAt DateTime @default(now())
+
+  // magic link fields used by auth.service
+  magicToken        String?   @unique
+  magicTokenExpires DateTime?
+
+  profile Profile?
+}
+
+model Profile {
+  id          String       @id @default(cuid())
+  userId      String       @unique
+  kind        ProfileKind
+  displayName String
+  genres      String[]
+  avatarUrl   String?      @db.Text
+  bio         String?      @db.Text
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relation to User
+  user User @relation(fields: [userId], references: [id])
+}
+
