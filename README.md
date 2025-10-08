@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="banner.png" alt="Mainframe AI Core — Context-Aware Music Intelligence Engine" width="100%">
+</p>
+
 # 🎧 Mainframe AI — Context-Aware Music Intelligence Engine
 
 **Mainframe AI Core** is a prototype music intelligence backend that powers
