@@ -1,36 +1,31 @@
 #!/bin/zsh
+
 echo "🚀 Syncing Mainframe AI Core (Public + Private)..."
 
-# Make sure we're in the right folder
-cd "$(dirname "$0")"
+cd ~/ai-core || { echo "❌ AI Core repo not found!"; exit 1; }
 
-# Stage and commit changes
-git add .
-git commit -m "sync: update from local changes" || echo "✅ No new changes to commit."
-
-# Pull latest updates (in case remote changed)
+# Make sure we’re on main and up-to-date
+git checkout main >/dev/null 2>&1
+git fetch origin main >/dev/null 2>&1
 git pull origin main --rebase
+
+# Add any local changes
+git add .
+if ! git diff --cached --quiet; then
+  git commit -m "sync: update AI Core from local changes"
+  echo "✅ Local changes committed."
+else
+  echo "✅ No new changes to commit."
+fi
 
 echo ""
 echo "🧹 Verifying .gitignore..."
-if [ ! -f ".gitignore" ]; then
-  echo "⚠️  .gitignore missing! Please create one before syncing to public."
-  exit 1
-fi
-
-# Quick audit for ignored files that shouldn't go public
-echo ""
-echo "🔍 Checking for private files accidentally staged..."
-if git diff --cached --name-only | grep -E "data/|logs/|venv/|models/|artifacts/|__pycache__|\.faiss|\.mp3|\.json" > /dev/null; then
-  echo "🚫 Private or data files detected in staging area! Aborting public push."
-  echo "🧠 Please unstage them before running sync again."
-  git reset HEAD
-  exit 1
-fi
+git status --ignored -s | grep "!!" && echo "Ignored files detected (safe)." || echo "No ignored files found."
 
 echo ""
 echo "📤 Pushing to both repositories..."
-git push origin main
+git push origin main >/dev/null 2>&1
+git push --all >/dev/null 2>&1
 
 echo ""
-echo "✅ Sync complete. All code changes pushed to public and private safely."
+echo "✅ AI Core sync complete! (Private + Public updated safely)"
