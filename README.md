@@ -1,5 +1,9 @@
 <p align="center">
-  <img src="banner.png" alt="Mainframe AI Core — Context-Aware Music Intelligence Engine" width="100%">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="banner-dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="banner-light.png">
+    <img alt="Mainframe AI Core — Context-Aware Music Intelligence Engine" src="banner-light.png" width="100%">
+  </picture>
 </p>
 
 # 🎧 Mainframe AI — Context-Aware Music Intelligence Engine
