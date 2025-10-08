@@ -6,6 +6,26 @@
   </picture>
 </p>
 
+<h3 align="center">The AI backbone powering Mainframe’s context-aware music intelligence</h3>
+
+---
+
+# 🎧 Mainframe AI — Context-Aware Music Intelligence Engine
+
+**Mainframe AI Core** is a prototype backend that powers  
+location-based, context-driven music recommendations and trend prediction.
+
+This public version demonstrates the API structure and design philosophy  
+behind the private Mainframe AI system.
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="banner-dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="banner-light.png">
+    <img alt="Mainframe AI Core — Context-Aware Music Intelligence Engine" src="banner-light.png" width="100%">
+  </picture>
+</p>
+
 # 🎧 Mainframe AI — Context-Aware Music Intelligence Engine
 
 **Mainframe AI Core** is a prototype music intelligence backend that powers
