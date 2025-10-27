@@ -1,44 +1,35 @@
-from ai_context.context_engine import ContextEngine
 from fastapi import APIRouter, Query
-from recommender.hybrid import HybridRecommender
-from api.global_store import vector_store as vs
-import numpy as np
+from ai_service.recommender import recommend_for_user, mood_to_vector, track_counts, user_streams
 
 router = APIRouter()
-rec_engine = HybridRecommender(vs)
 
 @router.get("/")
 def recommend(user_id: str = "demo", mood: str = Query(None)):
     """
-    Return AI-generated recommendations using stored audio embeddings.
+    Return AI-generated hybrid recommendations using the internal recommender system.
+    Integrates mood-based personalization and usage analytics.
     """
-    if not vs.vectors:
-        return {"error": "No tracks embedded yet. Upload songs first via /embed."}
+    # Check if we have any tracks at all
+    if not track_counts:
+        return {"error": "No tracks available yet. Embed or stream some songs first."}
 
-    # For now: use the mean of all existing vectors as the 'user vector'
-    u_vec = vs.get_user_vector(user_id)
-    context = {"mood": mood}
+    # Optional: generate a mood vector
+    mood_vec = mood_to_vector(mood) if mood else None
 
-    # Build dynamic context vector
-    ctx = ContextEngine(city="London")
-    context_vector = ctx.build_context_vector(mood)
-    context["vector"] = context_vector.tolist()
+    # Get recommendations from the recommender engine
+    recs = recommend_for_user(user_id, mood_vector=mood_vec)
 
-    recs = rec_engine.recommend(u_vec, context)
-
-    # --- Trend update ---
-    from recommender.trendflow import update_trend
-
-    # auto-boost the top recommended song
-    if recs:
-        top_track = recs[0]["track_id"]
-        trend_update = update_trend(top_track, boost=1.5)
-    else:
-        trend_update = {"info": "no recommendations to boost"}
+    # Summarize system state
+    total_users = len(user_streams)
+    total_tracks = len(track_counts)
 
     return {
+        "user_id": user_id,
+        "mood": mood or "neutral",
         "recommendations": recs,
-        "trend_update": trend_update,
-        "total_tracks": len(vs.vectors)
+        "analytics": {
+            "total_users": total_users,
+            "total_tracks": total_tracks,
+        },
     }
 

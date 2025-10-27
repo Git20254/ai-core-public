@@ -2,8 +2,38 @@ from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from embeddings.audio_embedder import AudioEmbedder
 from api.global_store import vector_store as vs
 from recommender.persistence import save_index
-from ai_context.context_engine import ContextEngine
 import tempfile, shutil, os, json, datetime, geocoder, numpy as np
+
+# --- ContextEngine Fallback (replaces missing ai_context module) ---
+class ContextEngine:
+    """
+    Lightweight context generator for uploaded artist tracks.
+    Combines mood, time, and location into a 3D normalized embedding vector.
+    """
+    def __init__(self, city: str = "Unknown"):
+        self.city = city
+
+    def build_context_vector(self, mood: str = None):
+        import numpy as np
+        import random, datetime
+
+        # base vector from random + time of day + city hash
+        city_hash = hash(self.city) % 1000 / 1000.0
+        time_factor = datetime.datetime.now().hour / 24.0
+        base = np.array([city_hash, time_factor, random.random()])
+
+        mood_modifiers = {
+            "happy": np.array([0.9, 0.8, 0.2]),
+            "energetic": np.array([0.95, 0.7, 0.3]),
+            "chill": np.array([0.4, 0.7, 0.8]),
+            "sad": np.array([0.2, 0.5, 0.9]),
+            "focus": np.array([0.6, 0.8, 0.6]),
+        }
+        if mood in mood_modifiers:
+            base = 0.5 * base + 0.5 * mood_modifiers[mood]
+
+        # normalize
+        return base / np.linalg.norm(base)
 
 router = APIRouter()
 ae = AudioEmbedder()
